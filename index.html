@@ -26,7 +26,7 @@
   </div>
   <!-- 볼륨버튼: 오른쪽 상단에 별도 위치 -->
   <button id="volumeBtn" class="volume-btn">🔊</button>  <!-- 문장 이미지/동영상 표시를 위한 컨테이너 -->
-  <div id="sentenceImageContainer" class="no-border-at-all" style="position:fixed !important; border:0 none transparent !important; box-shadow:none !important; outline:0 none transparent !important; background-color:transparent !important; top:45px !important;">
+  <div id="sentenceImageContainer" class="no-border-at-all" style="position:fixed !important; border:0 none transparent !important; box-shadow:none !important; outline:0 none transparent !important; background-color:transparent !important; top:48px !important;">
     <img id="sentenceImage" class="no-border-at-all" src="" alt="Sentence Image" style="border:0 none transparent !important; outline:0 none transparent !important; border-radius:0 !important; box-shadow:none !important; background-color:transparent !important; padding:0; margin:0;" />
     <!-- 동영상 요소는 자바스크립트에서 필요할 때 동적으로 생성됩니다 -->
   </div>
@@ -221,117 +221,25 @@
       playNext();
     }
 
-    function initializeSentenceDropdown() {
-      const dropdownBtn = document.getElementById('dropdownBtn');
-      const sentenceList = document.getElementById('sentenceList');
-      if (!dropdownBtn || !sentenceList) return;
-
-      const originalBtnHTML = dropdownBtn.innerHTML;
-      const originalBtnFontSize = dropdownBtn.style.fontSize || '47px';
-
-      dropdownBtn.addEventListener('click', function(event) {
-        // 게임이 실행 중인지 PAUSE 버튼 상태로 확인
-        const pauseBtn = document.getElementById('pauseBtn');
-        const isGameActuallyRunning = pauseBtn && pauseBtn.textContent === 'PAUSE';
-        
-        // 게임이 실행 중일 때는 드롭다운 버튼 작동 안함
-        if (isGameActuallyRunning) {
-          return; // 드롭다운 버튼 작동 차단
-        }
-        
-        if (sentenceList.style.display === 'block') {
-          // 닫기 로직
-          sentenceList.style.display = 'none';
-          if (window.isDropdownPause) {
-            togglePause();
-            window.isDropdownPause = false;
-          }
-          setTopButtonsDisabled(false); // 버튼 활성화
-          stopDropdownMp3Playback();
-          dropdownBtn.innerHTML = originalBtnHTML;
-          dropdownBtn.style.fontSize = originalBtnFontSize;
-          dropdownBtn.style.lineHeight = '';
-          dropdownBtn.style.minWidth = '';
-          dropdownBtn.style.minHeight = '';
-          dropdownBtn.style.padding = '';
-        } else {
-          // 열기 로직
-          populateSentenceList();
-          sentenceList.style.display = 'block';
-          setTimeout(() => {
-            const activeItem = sentenceList.querySelector(`.sentence-item:nth-child(${window.sentenceIndex + 1})`);
-            if (activeItem) activeItem.scrollIntoView({ behavior: 'auto', block: 'center' });
-          }, 100);
-          if (window.isGameRunning && !window.isGamePaused) {
-            togglePause();
-            const pauseBtn = document.getElementById('pauseBtn');
-            if (pauseBtn) pauseBtn.textContent = 'RESUME';
-            pauseBottomMedia();
-            console.log('드롭다운에서 pauseBottomMedia 호출');
-          } else {
-            const pauseBtn = document.getElementById('pauseBtn');
-            if (pauseBtn) pauseBtn.textContent = 'RESUME';
-            pauseBottomMedia();
-            console.log('드롭다운에서 pauseBottomMedia 호출(이미 일시정지)');
-          }
-          window.isGamePaused = true;
-          setTopButtonsDisabled(true);
-          dropdownMp3Index = (dropdownSentenceIndex + 1) % 96;
-          playAllSentenceMp3sFromStart();
-          dropdownBtn.style.position = 'relative';
-          dropdownBtn.innerHTML = `
-            <svg width="34" height="34" viewBox="0 0 34 34"
-              style="display:block; position:relative; left:19px; top:19px;">
-              <rect x="6" y="13" width="22" height="12" fill="white" />
-            </svg>
-          `;
-          dropdownBtn.style.fontSize = '6px';
-          dropdownBtn.style.lineHeight = '1';
-          dropdownBtn.style.minWidth = '0';
-          dropdownBtn.style.minHeight = '0';
-          dropdownBtn.style.padding = '0';
-        }
-      });
-    }
+    // script.js에서 정의된 initializeSentenceDropdown 함수를 사용합니다.
+    // 여기서는 함수 정의를 제거하고 스크립트 로드 후 자동으로 초기화됩니다.
 
     document.getElementById('startBtn').onclick = function() {
+      // 드롭다운이 열려있을 때는 START 버튼 기능 비활성화
+      const sentenceList = document.getElementById('sentenceList');
+      if (sentenceList && sentenceList.style.display === 'block') {
+        console.log("드롭다운 열린 상태에서 START 버튼 클릭 - 무시");
+        return false;
+      }
+      
       if (!isGameRunning && !isGamePaused) {
         startGame();
       }
       // else: 아무 동작 없음
     };
-
-    sentenceItem.addEventListener('click', function(e) {
-        // ... 기존 코드 ...
-        // 드롭다운 닫기
-        sentenceList.style.display = 'none';
-
-        // 1. 영어 읽기 중단
-        stopDropdownMp3Playback();
-
-        // 2. 드롭다운 버튼 원상복구
-        dropdownBtn.innerHTML = '&#9662;';
-        dropdownBtn.style.fontSize = '47px';
-        dropdownBtn.style.lineHeight = '';
-        dropdownBtn.style.minWidth = '';
-        dropdownBtn.style.minHeight = '';
-        dropdownBtn.style.padding = '';
-
-        // 3. 메뉴 버튼 활성화
-        setTopButtonsDisabled(false);
-
-        // 하단 미디어가 실제로 일시정지 상태라면 이어서 재생
-        if (typeof isBottomMediaPlaying !== 'undefined' && !isBottomMediaPlaying) {
-          if (typeof toggleBottomMediaPause === 'function') toggleBottomMediaPause();
-          if (typeof isDropdownBottomMediaPaused !== 'undefined') isDropdownBottomMediaPaused = false;
-        }
-
-        // 게임이 진행 중이면 중지
-        if (isGameRunning) {
-            stopGame();
-        }
-        // ... 기존 코드(게임 중이면 stopGame, startGame 등) ...
-    });
+    
+    // sentenceItem 이벤트 핸들러는 script.js에서 이미 정의되어 있으므로 제거
+    // 이 코드는 문맥이 없어 제대로 작동하지 않음
 
     // 폭발 시
     function onExplosion() {
@@ -395,6 +303,13 @@
     sentenceItem.setAttribute('data-index', index);
 
     document.getElementById('pauseBtn').onclick = function() {
+      // 드롭다운이 열려있을 때는 PAUSE/RESUME 버튼 기능 비활성화
+      const sentenceList = document.getElementById('sentenceList');
+      if (sentenceList && sentenceList.style.display === 'block') {
+        console.log("드롭다운 열린 상태에서 PAUSE/RESUME 버튼 클릭 - 무시");
+        return false;
+      }
+      
       if (!window.isGamePaused) {
         togglePause();
         this.textContent = 'RESUME';
